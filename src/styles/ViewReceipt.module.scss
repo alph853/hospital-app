@@ -1,0 +1,42 @@
+.container {
+    padding: 10%;
+    border-radius: 5px;
+    background-color: #00ACB1;
+    gap: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    .med {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-size: 1.2em;
+        overflow-y: auto;
+        div {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 5px;
+            border-bottom: 1px solid white;
+            .quantity{
+                font-weight: bold;
+            }
+            .name {
+                font-weight: bold;
+                color: white;
+            }
+            .price {
+                color: white;
+                font-style: italic;
+                font-size:1.2em;
+            }
+        }
+    }
+    .total {
+        font-size: 1.5em;
+        align-self: start;
+        font-weight: bold;
+        color: white;
+    }
+} 

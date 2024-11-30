@@ -1,0 +1,32 @@
+.container {
+    padding: 40px 60px;
+    height: 100vh;
+    overflow: hidden;
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 50px;
+        form {
+            margin: 0;
+        }
+        .add {
+            background-color: #00ACB1;
+            color: white;
+            height: 40px;
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            &:hover {
+                background-color: #47878E;
+            }
+            svg {
+                margin-right: 10px;
+            }
+        }
+    }
+}
