@@ -78,7 +78,7 @@ class DoctorService:
         patients = results.all()
         print(patients)
         result = {}
-        for treat, recovery_data ,admission, inpatient, in patients:
+        for treat, recovery_data ,admission, inpatient in patients:
             if treat.pid not in result:
                 result[treat.pid] = {
                 "pid": inpatient.pid,

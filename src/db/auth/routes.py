@@ -29,6 +29,7 @@ async def login_user(login_data:UserLoginModel,session:AsyncSession = Depends(ge
                     'email': email,
                 }
             )
+            
             refresh_token = create_access_token(
                 user_data={
                     'email': email,
@@ -36,12 +37,12 @@ async def login_user(login_data:UserLoginModel,session:AsyncSession = Depends(ge
                 refresh=True,
                 expiry= timedelta(days=REFRESH_TOKEN_EXPIRY)
             )
-
+            print(type(access_token))
             return JSONResponse(
                 content={
                     "message": "Log in successful",
-                    "access_token": access_token,
-                    "refresh_token": refresh_token,
+                    "access_token": access_token.decode("utf-8"),
+                    "refresh_token": refresh_token.decode("utf-8"),
                     "user":{
                         "email": email
                     }

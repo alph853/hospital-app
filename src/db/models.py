@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Field, Column
 from typing import Optional
-from sqlalchemy import Integer, String, Date, ForeignKey, CheckConstraint, Numeric, Boolean, ForeignKeyConstraint
+from sqlalchemy import Integer, String, Date, ForeignKey, CheckConstraint, Numeric, Boolean, ForeignKeyConstraint, func
 from datetime import date
 
 
@@ -42,7 +42,7 @@ class Phone(SQLModel, table=True):
 class Examination(SQLModel, table=True):
     sid: Optional[int] = Field(default=None, sa_column=Column(Integer, autoincrement=True, primary_key=True))
     fee: float = Field(sa_column=Column(Numeric(10, 2), CheckConstraint('fee > 0'), nullable=False))
-    e_date: date = Field(sa_column=Column(Date, nullable=False))
+    e_date: date = Field(default_factory=date.today, sa_column=Column(Date, nullable=False, server_default=func.now()))
     diagnosis: str = Field(sa_column=Column(String(200), nullable=True))
     next_exam_date: Optional[date] = Field(sa_column=Column(Date, nullable=True))
     pid: int = Field(sa_column=Column(Integer, ForeignKey("outpatient.pid", name="fk_examination_pid"), nullable=False))
@@ -60,7 +60,7 @@ class Treatment(SQLModel, table=True):
 
 class Admission(SQLModel, table=True):
     pid: int = Field(sa_column=Column(Integer, ForeignKey("inpatient.pid", name="fk_admission_pid"), primary_key=True, nullable=False))
-    date_of_adm: date = Field(sa_column=Column(Date, primary_key=True, nullable=False))
+    date_of_adm: date = Field(default_factory=date.today, sa_column=Column(Date, primary_key=True))
     date_of_disc: Optional[date] = Field(sa_column=Column(Date, nullable=True))
     room: str = Field(sa_column=Column(String(10), nullable=False))
     diagnosis: str = Field(sa_column=Column(String(200), nullable=True))

@@ -1,86 +1,147 @@
-from .schemas import PatientAddModel, TreatmentResponseModel, PatientResponseModel, ExaminationModel
-from ..models import Inpatient, Outpatient, Admission, Examination, Treatment, Treat
+from .schemas import PatientAddModel, TreatmentResponseModel, PatientResponseModel, ExaminationModel, PatientAddModelExisted, DoctorModel, PatientSearchModel, PatientModel, ExaminationAddModel, AdmissionAddModel
+from ..models import Inpatient, Outpatient, Examination, Treatment, Treat, Doctor, Admission
 from sqlalchemy import func, and_, or_, text
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlmodel import select
-from .schemas import PatientAddModel
+from sqlmodel import select, update
 
 class PatientService: 
-    async def _generate_new_pid(self, session: AsyncSession) -> int:
-       
-        inpatient_max_pid_query = await session.exec(select(func.max(Inpatient.pid)))
-        inpatient_max_pid = inpatient_max_pid_query.first() or 0 
+    async def create_new_patient(self, patient_data: PatientAddModel, session: AsyncSession):
+        patient_data_dict = patient_data.model_dump()
+        # pid = -1 => insert thang do table 
+        # pid != -1 => goi insert_patient => true => update 
+        # false => invalid pid 
+        # insert false : 
+        patient_type = patient_data_dict.pop('type')
+            # 0 la inpatient, 1 outpatient
+        new_patient = None
+        if patient_type != 0:      
+            new_patient = Inpatient(**patient_data_dict)
+        else: 
+            new_patient = Outpatient(**patient_data_dict)
 
-        outpatient_max_pid_query = await session.exec(select(func.max(Outpatient.pid)))
-        outpatient_max_pid = outpatient_max_pid_query.first() or 0  
-        next_pid = max(inpatient_max_pid, outpatient_max_pid) + 1
-        return next_pid
-    
-    async def create_patient(self, patient_data: PatientAddModel, session: AsyncSession):
+        session.add(new_patient)
+        await session.commit()  
+        await session.refresh(new_patient)
+        return new_patient 
+
+    async def create_existed_patient(self,patient_data:PatientAddModelExisted,session:AsyncSession): 
         patient_data_dict = patient_data.model_dump()
         patient_type = patient_data_dict.pop('type')
-        ipid = None
-        opid = None
-        if patient_data_dict['pid'] != -1: 
-            query1 = select(Inpatient).where(Inpatient.pid == patient_data_dict['pid'])
-                
-            query2 = select(Outpatient).where(Outpatient.pid == patient_data_dict['pid'])
-    
-            result1 = await session.exec(query1)
-            inpatient = result1.first()
-            ipid = inpatient.ipid if inpatient else None
+        pid = patient_data_dict.pop('pid')
 
-            result2 = await session.exec(query2)
-            outpatient = result2.first()
-            opid = outpatient.opid if outpatient else None
-
-            if not ipid and not opid:
-                return None
+        query = text('SELECT INSERT_PATIENT(:pid,:type) AS RESULT')
+        print('Hello\n1\n0\n0\n0: ')
+        result = await session.execute(query,{'pid':pid,'type':'outpatient' if not patient_type else 'inpatient'})
+        successful = result.scalar()
         
-        else: 
-            patient_data_dict['pid'] = await self._generate_new_pid(session)
-
-        new_patient = None
-        if patient_type == 0: 
-            admission = patient_data_dict.pop('admission')
-            admission['pid'] = patient_data_dict['pid']
-            if not ipid: 
-                new_patient = Inpatient(**patient_data_dict)
-
-                session.add(new_patient)
-                await session.commit()  
-        
-          
-                new_patient.ipid = f"IP{new_patient.pid:09}"  
-                await session.commit()
-            new_admission = Admission(**admission)
-            session.add(new_admission)
+        if successful: 
+            target_table = Inpatient if not patient_type == 0 else Outpatient
+            query = (update(target_table).where(target_table.pid == pid).values(**patient_data_dict).returning(*target_table.__table__.columns))
+            result = await session.execute(query)
+            updated_row = result.fetchone()
             await session.commit()
-            return new_patient if new_patient else new_admission
+            return updated_row._asdict() if updated_row else None
+        return None
+                
+    async def insert_examination(self,examination_data:ExaminationAddModel,session: AsyncSession):
+        data = examination_data.model_dump()
+        new_examination = Examination(**data)
+        session.add(new_examination)
+        await session.commit()  
+        await session.refresh(new_examination)
+        return new_examination 
     
-        else:  # Outpatient
-            if not opid:
-                new_patient = Outpatient(**patient_data_dict)
-                session.add(new_patient)
-                await session.commit()  
-        
-        
-                new_patient.opid = f"OP{new_patient.pid:09}"  
-                await session.commit()
-                return new_patient
+    async def insert_admission(self,admission_data:AdmissionAddModel,session: AsyncSession):
+        data = admission_data.model_dump()
+        new_admission = Admission(**data)
+        session.add(new_admission)
+        await session.commit()  
+        await session.refresh(new_admission)
+        return new_admission
+
+    async def search_patient(self,search_data:PatientSearchModel,session:AsyncSession):
+        rows = None
+        if search_data.pid: 
+            inpatient_query = select(Inpatient.pid,Inpatient.lname,Inpatient.fname,Inpatient.dob,Inpatient.address, Inpatient.phone,Inpatient.gender).where(Inpatient.pid == search_data.pid)
+            outpatient_query = select(Outpatient.pid,Outpatient.lname,Outpatient.fname,Outpatient.dob,Outpatient.address, Outpatient.phone,Outpatient.gender).where(Outpatient.pid == search_data.pid)
+            query = inpatient_query.union(outpatient_query)
+
+            res = await session.exec(query)
+            rows = res.all()
+        elif search_data.fname and search_data.lname: 
+            query = text('''
+            (SELECT PID, LNAME, FNAME, DOB, ADDRESS, PHONE, GENDER FROM INPATIENT
+            WHERE LOWER(LNAME) = :lname and LOWER(FNAME) = :fname) 
+            UNION 
+            (SELECT PID, LNAME, FNAME, DOB, ADDRESS, PHONE, GENDER FROM OUTPATIENT
+            WHERE LOWER(LNAME) = :lname and LOWER(FNAME) = :fname)''')
+            results = await session.execute(query,{'lname':search_data.lname.lower(),'fname': search_data.fname.lower()})
+            rows = results.fetchall()
+        elif search_data.fname and not search_data.lname: 
+            query = text('''
+            (SELECT PID, LNAME, FNAME, DOB, ADDRESS, PHONE, GENDER FROM INPATIENT
+            WHERE LOWER(LNAME) = :fname or LOWER(FNAME) = :fname) 
+            UNION 
+            (SELECT PID, LNAME, FNAME, DOB, ADDRESS, PHONE, GENDER FROM OUTPATIENT
+            WHERE LOWER(LNAME) = :fname and LOWER(FNAME) = :fname)''')
+            results = await session.execute(query,{'fname': search_data.fname.lower()})
+            rows = results.fetchall()
+        if rows: 
+            return [
+                PatientModel(
+                    pid=row[0],
+                    lname=row[1],
+                    fname=row[2],
+                    dob=row[3],
+                    address=row[4],
+                    phone=row[5],
+                    gender=row[6]
+                )
+                for row in rows
+            ]
+
+
+
         
     async def find_examination_by_pid(self,pid:int,session:AsyncSession):
-        query = select(Examination).where(Examination.pid == pid)
+        query = select(Examination.sid,
+                Examination.fee,
+                Examination.e_date,
+                Examination.diagnosis,
+                Examination.next_exam_date,
+                Examination.did,
+                Examination.med_f,
+                Doctor.ecode,
+                Doctor.lname,
+                Doctor.fname,).join(Doctor,Examination.did == Doctor.ecode).where(Examination.pid == pid)
         res = await session.exec(query)
-        return res
+        rows = res.all()
+        examinations = []
+        for row in rows:
+            exam_data = {
+                "sid": row.sid,
+                "fee": row.fee,
+                "e_date": row.e_date,
+                "diagnosis": row.diagnosis,
+                "next_exam_date": row.next_exam_date,
+                "doctor": {
+                    "ecode": row.did,
+                    "name": row.lname + ' ' + row.fname,
+                },
+                "did": row.did,
+                "med_f": row.med_f,
+            }
+            examinations.append(ExaminationModel(**exam_data))
+        
+        return examinations
 
     async def find_treatment_by_pid(self,pid:int,session:AsyncSession):
-        query = select(Treatment,Treat.did).join(Treat,Treatment.sid == Treat.sid).where(Treat.pid==pid)
+        query = select(Treatment,Treat.did,Doctor.fname, Doctor.lname).join(Treat,Treatment.sid == Treat.sid).join(Doctor, Treat.did == Doctor.ecode).where(Treat.pid==pid)
         results = await session.exec(query)
         treatments = results.all()
 
         treatment_dict = {}
-        for treatment, did in treatments:
+        for treatment, did, fname, lname in treatments:
             if treatment.sid not in treatment_dict:
                 treatment_dict[treatment.sid] = {
                     "sid": treatment.sid,
@@ -92,8 +153,8 @@ class PatientService:
                     "did": [],
                     "pid": pid,
                 }
-        
-            treatment_dict[treatment.sid]["did"].append(did)
+
+            treatment_dict[treatment.sid]["did"].append(DoctorModel(**{'ecode':did,'name':fname + ' ' + lname}))
 
 
         return [TreatmentResponseModel(**data) for data in treatment_dict.values()]
@@ -174,10 +235,10 @@ class PatientService:
     async def get_medication_info_by_pid(self,pid:int,session: AsyncSession):
         query1 = '''
         WITH TEMP AS (SELECT SID FROM TREAT WHERE PID = :pid)
-        SELECT t_consist_of.sid, mid, quantity, name, price 
-        FROM t_consist_of 
-        JOIN medication ON t_consist_of.mid = medication.medication_id
-        WHERE t_consist_of.sid IN (SELECT SID FROM TEMP);
+        SELECT t_consists_of.sid, mid, quantity, name, price 
+        FROM t_consists_of 
+        JOIN medication ON t_consists_of.mid = medication.medication_id
+        WHERE t_consists_of.sid IN (SELECT SID FROM TEMP);
         '''
         result = await session.execute(text(query1), {"pid": pid})
         datas = [dict(row) for row in result.mappings()]
@@ -208,6 +269,20 @@ class PatientService:
                 })
             
         return meds
+    
+
+    async def get_patient_by_name(self,name:str,session:AsyncSession):
+        query = '''
+            WITH TEMP AS ((SELECT ipid as id, FNAME || ' ' || LNAME AS NAME FROM INPATIENT) UNION (SELECT opid as id,  FNAME || ' ' || LNAME AS NAME FROM OUTPATIENT))
+            SELECT * FROM TEMP WHERE LOWER(NAME) LIKE :name 
+        '''
+        params = {'name': f'%{name.lower()}%'}
+        result = await session.execute(text(query),params)
+        patients = [dict(row) for row in result.mappings()]
+        return patients
+
+    async def get_patient_by_fname(self,name:str,session:AsyncSession):
+        pass
 
 
 

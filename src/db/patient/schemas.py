@@ -2,6 +2,10 @@ from pydantic import BaseModel
 from datetime import date
 from typing import Optional
 
+class PatientSearchModel(BaseModel): 
+    pid: Optional[int] = None
+    lname: Optional[str] = None 
+    fname: Optional[str] = None
 class AdmissionModel(BaseModel):
     pid: Optional[int] = None
     date_of_adm: date 
@@ -10,41 +14,70 @@ class AdmissionModel(BaseModel):
     fee: float 
     nurse_id: int 
 
-class InPatientModel(BaseModel):
+class ExaminationAddModel(BaseModel):
+    fee: int 
+    diagnosis: Optional[str]
+    next_exam_date: Optional[date] = None
     pid: int
-    ipid: str 
+    did: int
+
+class AdmissionAddModel(BaseModel):
+    pid: int
+    date_of_adm: Optional[date] = None
+    room: str
+    nurse_id: int 
+    diagnosis: Optional[str] = None
+    fee: int
+
+class PatientModel(BaseModel):
+    pid: int 
     lname: str 
     fname: str 
-    dob: date
-    address: str 
-    phone: str 
+    dob: Optional[date]
+    address: Optional[str] 
+    phone: Optional[str] 
+    gender: str 
+
+class InPatientModel(BaseModel):
+    pid: int 
+    ipid: str
+    lname: str 
+    fname: str 
+    dob: Optional[date]
+    address: Optional[str] 
+    phone: Optional[str] 
     gender: str 
 
     
 class OutPatientModel(BaseModel):
     pid: int 
-    opid: str 
+    opid: str
     lname: str 
     fname: str 
-    dob: date
-    address: str 
-    phone: str 
-    gender: str
-    class Config:
-        orm_mode = True
-        from_attributes = True 
-
+    dob: Optional[date]
+    address: Optional[str] 
+    phone: Optional[str] 
+    gender: str 
 class PatientAddModel(BaseModel):
-    pid: int
     fname: str
     lname: str
     dob: date 
     address: str
     phone: str
     gender: str
-    admission: Optional[AdmissionModel] = None
     # 0 for inpatient, 1 for outpatient
     type: int
+
+class PatientAddModelExisted(BaseModel):
+    pid: int
+    address: str | None
+    phone: str | None
+    # 0 for inpatient, 1 for outpatient
+    type: int
+
+class DoctorModel(BaseModel):
+    ecode: int
+    name: str
 
 class ExaminationModel(BaseModel):
     sid: int
@@ -52,7 +85,7 @@ class ExaminationModel(BaseModel):
     e_date: date 
     diagnosis: str
     next_exam_date: Optional[date]
-    pid: int 
+    doctor: DoctorModel
     did: int 
     med_f: bool 
 
@@ -63,7 +96,7 @@ class TreatmentResponseModel(BaseModel):
     result: Optional[str] 
     recover_f: bool
     med_f: bool 
-    did: list[int]
+    did: list[DoctorModel]
     pid: int 
 
 class PatientResponseModel(BaseModel):

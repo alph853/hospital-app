@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 from .schemas import DoctorResponseModel, PatientTreatmentResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 from ..main import get_session
-from fastapi.exceptions import HTTPException
 from .service import DoctorService
 from src.db.auth.dependencies import AccessTokenBearer
+from src.utils import handle_database_exception 
 
 doctor_router = APIRouter()
 doctor_service = DoctorService()
@@ -16,9 +16,13 @@ async def find_all_doctors(
     session: AsyncSession = Depends(get_session),
     user_details=Depends(access_token_bearer)
 ):
-    print(user_details)
-    doctors = await doctor_service.get_all_doctors(session)
-    return doctors
+    try: 
+        print(user_details)
+        doctors = await doctor_service.get_all_doctors(session)
+        return doctors
+    except Exception as e: 
+        await(handle_database_exception(session,"Can not access database",e))
+
 
 @doctor_router.get('/{ecode}', response_model=DoctorResponseModel|dict)
 async def find_doctor_ecode(
@@ -26,11 +30,13 @@ async def find_doctor_ecode(
     session: AsyncSession=Depends(get_session),
     user_details=Depends(access_token_bearer)
 ):
-    doctor = await doctor_service.get_doctor_by_id(ecode,session)
-    if doctor: 
-        return doctor
+    try: 
+        doctor = await doctor_service.get_doctor_by_id(ecode,session)
+        if doctor: 
+            return doctor
+    except Exception as e: 
+        await(handle_database_exception(session,"No patient found",e))
     
-    return {}
 
 @doctor_router.get('/get_treated_patients/{ecode}',response_model=list)
 async def find_treated_patients(

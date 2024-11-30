@@ -39,3 +39,4 @@ app.add_middleware(
 app.include_router(auth_router,prefix=f"/api/{version}/auth",tags=['account'])
 app.include_router(patient_router,prefix=f"/api/{version}/patient",tags=['patient'])
 app.include_router(doctor_router,prefix=f"/api/{version}/doctor",tags=['doctor'])
+

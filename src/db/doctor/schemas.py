@@ -21,7 +21,7 @@ class TreatmentItem(BaseModel):
     sid: int
     start_date: date
     end_date: Optional[date]
-    result: str
+    result: Optional[str]
     recover_f: bool
 
 class PatientTreatmentResponse(BaseModel):
