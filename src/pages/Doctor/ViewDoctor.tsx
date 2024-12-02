@@ -1,11 +1,12 @@
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation} from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Doctor, Patient } from "@/entities";
-import { Doctors, patients as Patients } from "@/utils/SampleData";
 import ViewPatients from "@/components/ViewPatients";
 import { DatetoString, routes } from "@/utils";
 import styles from '@/styles/ViewDoctor.module.scss';
+import useAuth from "@/hooks/useAuth";
 function ViewDoctor() {
+    useAuth()
     const { doctorId } = useParams();
     const location = useLocation();
     const [doctor, setDoctor] = useState<Doctor|null>(null);
@@ -17,7 +18,21 @@ function ViewDoctor() {
           const { doctorData } = location.state as { doctorData: Doctor };
           console.log("Has data", doctorData)
           setDoctor(doctorData);
-          setPatients(Patients);
+
+          (async () => {
+            setLoading(true);
+            const { url, options } = routes.getPatientsByDoctor(doctorData.ecode);
+            const res = await fetch(url, options);
+            if (res.ok) {
+              const data = await res.json()
+              setPatients(data)
+              setLoading(false)
+              return;
+            }
+            setError('Something went wrong')
+            setLoading(false)
+          })();
+
           return;
         }
         console.log("No data")
@@ -29,9 +44,10 @@ function ViewDoctor() {
         setError('');
 
         const promise1 = (async () => {
-          const res = await fetch(routes.getDoctorById)
+          const { url, options } = routes.getDoctorById(parseInt(doctorId));
+          const res = await fetch(url, options);
           if (res.ok) {
-            const data= await res.json()
+            const data = await res.json()
             setDoctor(data)
             return;
           }
@@ -39,13 +55,13 @@ function ViewDoctor() {
         })();
 
         const promise2 = (async () => {
-          const res = await fetch(routes.getDoctorPatients)
+          const { url, options } = routes.getPatientsByDoctor(parseInt(doctorId));
+          const res = await fetch(url, options);
           if (res.ok) {
             const data = await res.json()
             setPatients(data)
             return;
           }
-          setError('Something went wrong')
         })();
 
         Promise.all([promise1, promise2]).then(() => {setLoading(false)})

@@ -1,10 +1,15 @@
-import { LoggedInContext } from "@/context/LoggedInContext";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { LoggedInContext } from "../context/LoggedInContext";
 
 function useAuth() {
-  const context =  useContext(LoggedInContext)
-  if (!context) throw new Error("useAuth must be used within a LoggedInProvider")
-  return context
+  const isLoggedIn =  useContext(LoggedInContext)
+  const navigate = useNavigate()
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/login')
+    }
+  }, [isLoggedIn])
 }
 
 export default useAuth;

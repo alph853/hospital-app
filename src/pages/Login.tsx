@@ -2,14 +2,12 @@ import {useState} from 'react'
 import { useNavigate } from 'react-router-dom'
 import hospitalImage from '@/assets/hospital.png'
 import styles from '@/styles/LoginPage.module.scss'
-import useAuth from '@/hooks/useAuth'
 import { routes } from '@/utils'
 
 function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('');
-  const [_, setLoggedIn] = useAuth()
   const navigate = useNavigate()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -19,25 +17,15 @@ function Login() {
       return
     }
 
-    const  response = await fetch(routes.login, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({email: username, password}),
-       credentials: 'include',
-    })
-    if (response.ok) {
-      setError('')
-      setLoggedIn(true)
+    const { url, options } = routes.login(username, password)
+    const res = await fetch(url, options)
+
+    if (res.ok) {
       navigate('/dashboard')
-    } else {
-      setError('Email or password is incorrect')
     }
-
-    setLoggedIn(true)
-    navigate('/dashboard')
-
+    else {
+      setError('Login failed')
+    }
   }
   return (
     <div className={styles.page}>

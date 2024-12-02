@@ -1,11 +1,11 @@
 import { useLocation, useParams} from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { Patient, Service, Examination, Treatment, Receipt } from "@/entities";
-import { patients, Receipts } from "@/utils/SampleData";
 import ViewServices from "@/components/ViewServices";
 import ViewReceipt from "@/components/ViewReceipt";
 import { DatetoString, routes } from "@/utils";
 import styles from '@/styles/ViewDoctor.module.scss';
+import useAuth from "@/hooks/useAuth";
 
 
 function mixAndSortServices(treatments: Treatment[], examinations: Examination[]): Service[] {
@@ -21,6 +21,7 @@ function mixAndSortServices(treatments: Treatment[], examinations: Examination[]
 }
 
 function ViewPatient() {
+  useAuth()
   const [patient, setPatient] = useState<Patient|null>(null);
   const {patientId} = useParams();
   const location = useLocation();
@@ -28,6 +29,7 @@ function ViewPatient() {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt|undefined>(undefined)
   const [selectedService, setSelectedService] = useState<number|null>(null)
+  const receipts = useRef<Receipt[]>([]);
   const containerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (location.state) {
@@ -39,28 +41,35 @@ function ViewPatient() {
       setError('Patient not found');
       return;
     }
-    const result = patients.find((patient) => patient.pid.toString() === patientId)
-    if (!result) {
-      setError('Bad')
-      return;
-    }
-    setPatient(result)
-    setError('');
+    setLoading(true);
+    const promise1 = (async () => {
+      setError('');
+      const {url, options} = routes.getPatientById(parseInt(patientId));
+      const res = await fetch(url, options);
+      if (res.ok) {
+        const data = await res.json()
+        setPatient(data)
+        return;
+      }
+      setLoading(false);
+      setError('Getting patient went wrong')
+    })();
 
-    // (async () => {
-    //   const res = await fetch(routes.getPatientById, {
-    //     method: 'GET',
-    //     body: JSON.stringify({}),
-    //     credentials: "include"
-    //   })
-    //   setLoading(false);
-    //   if (res.ok) {
-    //     const data = await res.json()
-    //     setPatient(data)
-    //     return;
-    //   }
-    //   setError('Patient doesnt exist')
-    // })()
+    const promise2 = (async () => {
+      setError('');
+      const {url, options} = routes.getMedInfoById(parseInt(patientId));
+      const res = await fetch(url, options);
+      if (res.ok) {
+        const data = await res.json()
+        receipts.current = data
+        return;
+      }
+      setError('Getting med info went wrong')
+    })();
+
+    Promise.all([promise1, promise2]).then(() => {
+      setLoading(false);
+    })
 
   },[patientId])
 
@@ -79,8 +88,8 @@ function ViewPatient() {
     };
   }, [containerRef]);
 
-  const handleClick= (service: Service) => {
-    const receipt = Receipts.find((receipt: Receipt)=> receipt.sid===service.sid)
+  const handleClick= async (service: Service) => {
+    const receipt = receipts.current.find((receipt: Receipt)=> receipt.sid===service.sid)
     if (!receipt) console.log("No receipt")
     console.log(receipt)
     setSelectedReceipt(receipt)

@@ -1,25 +1,25 @@
 import useAuth from "@/hooks/useAuth";
 import { routes } from "@/utils";
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
 import doctorImage from '@/assets/doctor.png'
 import patientImage from '@/assets/patient.png'
 import medicalCheckupImage from '@/assets/medical-checkup.svg'
 import styles from '@/styles/Dashboard.module.scss'
 function Dashboard() {
-    const [isLoggedIn, _] = useAuth()
     const [numDoctors, setNumDoctors] = useState(0)
     const [numPatients, setNumPatients] = useState(0)
-    if (!isLoggedIn) {
-        return <Navigate to="/login" />
-    }
+    const [loading, setLoading] = useState(false)
+    useAuth()
     useEffect(() => {
         (async () => {
-            const res = await fetch(routes.countPatientandDoctors)
+            setLoading(true)
+            const {url, options} = routes.countPatientandDoctors()
+            const res = await fetch(url, options)
             if (res.ok) {
                 const data = await res.json()
                 setNumDoctors(data.doctors)
                 setNumPatients(data.patients)
+                setLoading(false)
             }
         })();
     },[])
@@ -30,7 +30,7 @@ function Dashboard() {
                     <div >Welcome back</div>
                     <div style={{fontWeight: "800", fontSize: "3em"}}>Manager</div>
                 </div>
-                <div className={styles.overview}>
+                {loading ? <div>Loading...</div>: <div className={styles.overview}>
                     <div className={styles.overviewText}>Overview</div>
                     <div className={styles.summary}>
                         <img src={doctorImage} alt="doctor" />
@@ -46,7 +46,7 @@ function Dashboard() {
                             <div className={styles.countText}>{numPatients > 1? "patients": "patient" + " in cure"}</div>
                         </div>
                     </div>
-                </div>
+                </div>}
             </div>
             <div className={styles.message}>
                 <img src={medicalCheckupImage} alt="medical checkup" />

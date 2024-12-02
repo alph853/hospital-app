@@ -11,7 +11,7 @@ import {
   import ViewPatientPage from "@/pages/Patient/ViewPatient";
   import AddPatient from "@/pages/Patient/AddPatient";
   import AddExamination from "@/pages/Patient/AddExamination";
-  import AddTreatment from "@/pages/Patient/AddTreatment";
+  import AddAdmission from "@/pages/Patient/AddAdmission";
   import Layout from "@/components/Layout";
   import App from "@/App";
   import { Navigate } from "react-router-dom";
@@ -28,7 +28,7 @@ import {
 
           <Route path="patient" element={<Layout><SearchPatientPage /></Layout>} />
           <Route path="patient/add" element={<Layout><AddPatient /></Layout>} />
-          <Route path="patient/:patientId/add/treatment" element={<Layout><AddTreatment/></Layout>} />
+          <Route path="patient/:patientId/add/admission" element={<Layout><AddAdmission/></Layout>} />
           <Route path="patient/:patientId/add/examination" element={<Layout><AddExamination/></Layout>} />
           <Route path="patient/:patientId" element={<Layout><ViewPatientPage /></Layout>} />
 

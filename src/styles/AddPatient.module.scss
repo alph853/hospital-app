@@ -1,6 +1,7 @@
 .container {
     height: 100vh;
     padding: 40px 60px;
+    overflow: hidden;
     .already {
         margin-bottom: 30px;
         transform: scale(1.5);
@@ -44,11 +45,14 @@
     form {
         transform: scale(1.2);
         transform-origin: top left;
+        width: 60vw;
         >div{
             margin-bottom: 20px;
+            
         }
         label {
             display: block;
+            width: 50%;
             margin-bottom: 10px;
         }
         input {
@@ -71,5 +75,7 @@
             }
         }
     }
-   
+   .select {
+    width: 30%;
+   }
 }

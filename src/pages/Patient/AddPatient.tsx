@@ -5,12 +5,14 @@ import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import styles from '@/styles/AddPatient.module.scss'
 import { Patient } from "@/entities";
 import { routes } from "@/utils";
-import { patients } from "@/utils/SampleData"; 
+import useAuth from "@/hooks/useAuth";
 function AddPatient() {
+    useAuth()
     const [already, setAlready] = useState(false)
     const [patient, setPatient] = useState<Patient | undefined>(undefined)
     const [formData, setFormData] = useState({
-        name: '',
+        fname: '',
+        lname: '',
         dob: '',
         type: '',
         pid: '',
@@ -28,26 +30,36 @@ function AddPatient() {
                 return;
               }
             } else {
-              if (formData[key as keyof typeof formData] === '') {
+              if (key != "lname" && key !="fname" && key !="gender" && key !="dob" && formData[key as keyof typeof formData] === '') {
                 alert("Bad")
                 return;
               }
             }
         }
-        alert("Added successfully")
-        setPatient(patients[0])
         
-        // const res = await fetch(routes.patientAdd, {
-        //     method: 'POST',
-        //     body: JSON.stringify({}),
-        //     credentials: "include"
-        // })
-        // if (res.ok) {
-        //     const data = await res.json()
-        //     alert("Added successfully")
-        //     setPatient(data)
-        // }
-        console.log(formData)
+        if (already) {
+            const { url, options } = routes.AddVisitedPatient(parseInt(formData.pid), formData.type, formData.address, formData.phone);
+            const res = await fetch(url, options);
+            if (res.ok) {
+                const data = await res.json()
+                setPatient(data)
+                alert("Patient added")
+                return;
+            }
+            alert("Failed to add patient")
+            return;
+        }
+
+        const { url, options } = routes.AddNewPatient(formData.fname, formData.lname, new Date(formData.dob), formData.type, 
+                                                    formData.address, formData.phone, formData.gender);
+        const res = await fetch(url, options);
+        if (res.ok) {
+            const data = await res.json()
+            setPatient(data)
+            alert("Patient added")
+            return;
+        }
+        alert("Failed to add patient")
     }
     return (
         <div className={styles.container}>
@@ -62,7 +74,8 @@ function AddPatient() {
             <form id="addPatient" onSubmit={handleSubmit}>
                 {!already && <><div>
                     <label>Name</label>
-                    <input type="text" value={formData.name} placeholder="Enter fullname" onChange={(e) => {setFormData((prev) => ({...prev, name: e.target.value}))}}/>
+                    <input type="text" value={formData.fname} placeholder="Enter fistname" onChange={(e) => {setFormData((prev) => ({...prev, fname: e.target.value}))}}/>
+                    <input type="text" value={formData.lname} placeholder="Enter lastname" onChange={(e) => {setFormData((prev) => ({...prev, lname: e.target.value}))}}/>
                 </div>
                 <div>
                     <label>Date of birth</label>

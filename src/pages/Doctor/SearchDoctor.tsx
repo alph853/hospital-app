@@ -3,9 +3,10 @@ import styles from '@/styles/SearchDoctor.module.scss';
 import {Doctor} from '@/entities';
 import InfoGrid from '@/components/InfoGrid';
 import QuickFind from '@/components/QuickFind';
-import { Doctors } from '@/utils/SampleData';
-import { routes } from '@/utils';
+import { routes, parseSearch } from '@/utils';
+import useAuth from '@/hooks/useAuth';
 function SearchDoctor() {
+  useAuth()
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -16,20 +17,23 @@ function SearchDoctor() {
     }
     setError('');
     setLoading(true);
-
-    const res = await fetch(routes.doctorSearch, {
-      method: 'POST',
-      body: JSON.stringify({}),
-      credentials: "include"
-    })
-    setLoading(false)
+    const searchResult = parseSearch(search);
+    if (!searchResult) {
+      setError('Invalid search term');
+      return;
+    }
+    const { id, fname, lname } = searchResult;
+    const { url, options } = routes.doctorSearch(id, fname, lname);
+    const res = await fetch(url, options);
 
     if (res.ok) {
       const data = await res.json()
       setDoctors(data)
+      setLoading(false)
       return
     }
     setError("Something went wrong")
+    setLoading(false)
   }
   return (
     <div className={styles.container}>

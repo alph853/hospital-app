@@ -1,4 +1,4 @@
-import { Service, Treatment, Examination } from "@/entities";
+import { Service, Treatment } from "@/entities";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import QuickFind from "./QuickFind";
@@ -119,7 +119,7 @@ function ViewServices({ services, onClick, rows, selectedService }: { services: 
       <div className={styles.head}>
         <QuickFind onSubmit={searchService} placeholder={"Enter ID/Doctor name/Date"} />
         <div className={styles.buttons}>
-          <Link to={`/patient/${patientId}/add/treatment`}><FontAwesomeIcon icon={faPlusCircle}/>Add Treatment</Link>
+          <Link to={`/patient/${patientId}/add/admission`}><FontAwesomeIcon icon={faPlusCircle}/>Add Admission</Link>
           <Link to={`/patient/${patientId}/add/examination`}><FontAwesomeIcon icon={faPlusCircle}/> Add Examination</Link>
         </div>
       </div>
