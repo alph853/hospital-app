@@ -1,0 +1,58 @@
+{
+  "pid": 1,
+  "lname": "Doe",
+  "fname": "John",
+  "dob": "1985-05-15",
+  "address": "123 Main St, Springfield, IL",
+  "phone": "555-1234",
+  "gender": "M",
+  "examinations": [
+    {
+      "sid": 1,
+      "fee": 25.5,
+      "e_date": "2024-11-14",
+      "diagnosis": "Fever with cough",
+      "next_exam_date": "2024-11-16",
+      "pid": 1,
+      "did": 1,
+      "med_f": false
+    },
+    {
+      "sid": 2,
+      "fee": 15,
+      "e_date": "2024-11-16",
+      "diagnosis": "Fever recovered",
+      "next_exam_date": null,
+      "pid": 1,
+      "did": 1,
+      "med_f": false
+    }
+  ],
+  "treatments": [
+    {
+      "sid": 1,
+      "start_date": "2024-11-04",
+      "end_date": "2024-11-07",
+      "result": "Still not recovered",
+      "t_fee": 500.15,
+      "recover_f": false,
+      "med_f": true,
+      "did": [2, 1],
+      "pid": 1
+    },
+    {
+      "sid": 2,
+      "start_date": "2024-11-09",
+      "end_date": null,
+      "result": "Already recovered",
+      "t_fee": 200,
+      "recover_f": true,
+      "med_f": true,
+      "did": [2],
+      "pid": 1
+    }
+  ]
+}
+
+
+
