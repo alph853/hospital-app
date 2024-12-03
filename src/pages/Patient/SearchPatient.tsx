@@ -3,13 +3,14 @@ import { Patient } from '@/entities';
 import QuickFind from '@/components/QuickFind';
 import InfoGrid from '@/components/InfoGrid';
 import { routes, parseSearch } from '@/utils';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from '@/styles/SearchPatient.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import useAuth from '@/hooks/useAuth';
 function SearchPatient() {
   useAuth();
+  const navigate = useNavigate();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,11 @@ function SearchPatient() {
       return;
     }
     const { id, fname, lname } = searchResult;
-    const { url, options } = routes.patientSearch(id, fname, lname);
+    const { url, options } = await routes.patientSearch(id, fname, lname);
+    if (!options) {
+      navigate('/login');
+      return;
+    }
     const res = await fetch(url, options);
     if (res.ok) {
       const data = await res.json()

@@ -11,7 +11,11 @@ import { routes } from '@/utils';
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const navigate = useNavigate()
     const handleLogout = async () => {
-        const {url, options} = routes.logout()
+        const {url, options} = await routes.logout()
+        if (!options) {
+            navigate('/login')
+            return
+        }
         const res = await fetch(url, options)
         if (res.ok) {
             navigate('/login')

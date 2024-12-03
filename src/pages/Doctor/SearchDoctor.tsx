@@ -5,8 +5,10 @@ import InfoGrid from '@/components/InfoGrid';
 import QuickFind from '@/components/QuickFind';
 import { routes, parseSearch } from '@/utils';
 import useAuth from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 function SearchDoctor() {
   useAuth()
+  const navigate = useNavigate()
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,7 +25,11 @@ function SearchDoctor() {
       return;
     }
     const { id, fname, lname } = searchResult;
-    const { url, options } = routes.doctorSearch(id, fname, lname);
+    const { url, options } = await routes.doctorSearch(id, fname, lname);
+    if (!options) {
+      navigate('/login');
+      return;
+    }
     const res = await fetch(url, options);
 
     if (res.ok) {

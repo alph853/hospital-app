@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import { routes } from "@/utils";
+import { isTokenExpired, refreshToken} from "@/utils";
 export const LoggedInContext = createContext<boolean | undefined>(undefined);
 
 function LoggedInProvider({ children }: { children: React.ReactNode }) {
@@ -7,13 +7,18 @@ function LoggedInProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const { url, options } = routes.verifyLogin();
-      const res = await fetch(url, options);
-      if (res.ok) {
-        setLoggedIn(true);
+      if (isTokenExpired('refresh_token')) {
+        setLoggedIn(false);
         return;
       }
-      setLoggedIn(false);
+      if (isTokenExpired('access_token')) {
+        const res = await refreshToken();
+        if (!res) {
+          setLoggedIn(false);
+          return;
+        }
+      }
+      setLoggedIn(true);
     })()
   }, []);
 

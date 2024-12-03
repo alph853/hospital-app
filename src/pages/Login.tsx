@@ -17,10 +17,13 @@ function Login() {
       return
     }
 
-    const { url, options } = routes.login(username, password)
-    const res = await fetch(url, options)
+    const { url, options } = await routes.login(username, password)
+    const res = await fetch(url, options!)
 
     if (res.ok) {
+      const content = await res.json()
+      localStorage.setItem('token', content.token)
+      localStorage.setItem('refresh token', content.refresh_token)
       navigate('/dashboard')
     }
     else {

@@ -1,4 +1,4 @@
-import { useParams, useLocation} from "react-router-dom";
+import { useParams, useLocation, useNavigate} from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Doctor, Patient } from "@/entities";
 import ViewPatients from "@/components/ViewPatients";
@@ -9,6 +9,7 @@ function ViewDoctor() {
     useAuth()
     const { doctorId } = useParams();
     const location = useLocation();
+    const navigate = useNavigate();
     const [doctor, setDoctor] = useState<Doctor|null>(null);
     const [patients, setPatients] = useState<Patient[]>([]);
     const [error, setError] = useState<string>('');
@@ -21,7 +22,11 @@ function ViewDoctor() {
 
           (async () => {
             setLoading(true);
-            const { url, options } = routes.getPatientsByDoctor(doctorData.ecode);
+            const { url, options } = await routes.getPatientsByDoctor(doctorData.ecode);
+            if (!options) {
+              navigate('/login');
+              return;
+            }
             const res = await fetch(url, options);
             if (res.ok) {
               const data = await res.json()
@@ -44,7 +49,11 @@ function ViewDoctor() {
         setError('');
 
         const promise1 = (async () => {
-          const { url, options } = routes.getDoctorById(parseInt(doctorId));
+          const { url, options } = await routes.getDoctorById(parseInt(doctorId));
+          if (!options) {
+            navigate('/login');
+            return;
+          }
           const res = await fetch(url, options);
           if (res.ok) {
             const data = await res.json()
@@ -55,7 +64,11 @@ function ViewDoctor() {
         })();
 
         const promise2 = (async () => {
-          const { url, options } = routes.getPatientsByDoctor(parseInt(doctorId));
+          const { url, options } = await routes.getPatientsByDoctor(parseInt(doctorId));
+          if (!options) {
+            navigate('/login');
+            return;
+          }
           const res = await fetch(url, options);
           if (res.ok) {
             const data = await res.json()

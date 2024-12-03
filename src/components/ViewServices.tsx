@@ -23,16 +23,35 @@ function ViewServices({ services, onClick, rows, selectedService, type }: { serv
       setDisplayedServices(services);
       return;
     }
-    setTimeout(() => {
-      const result = services.filter((service) => {
-        return service.sid.toString().includes(search);
-      });
-      if (result.length === 0) {
-        setError('No services found');
-        return;
+    const result = services.filter((service) => {
+      if (service.sid.toString().includes(search)) {
+        return true;
       }
-      setDisplayedServices(result);
-    }, 1000);
+      if (isTreatment(service)) {
+        if (service.did.some(({name}) => name.toLowerCase().includes(search.toLowerCase()))) {
+          return true;
+        }
+      } else {
+        if (service.did.name.toLowerCase().includes(search.toLowerCase())) {
+          return true;
+        }
+      }
+      if (isTreatment(service)) {
+        if (DatetoString(service.start_date).toLowerCase().includes(search.toLowerCase())) {
+          return true;
+        }
+      } else {
+        if (DatetoString(service.e_date).toLowerCase().includes(search.toLowerCase())) {
+          return true;
+        }
+      }
+      return false;
+    });
+    if (result.length === 0) {
+      setError('No services found');
+      return;
+    }
+    setDisplayedServices(result);
   }
 
   // Calculate the indices for slicing the displayedServices array

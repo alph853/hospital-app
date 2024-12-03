@@ -1,4 +1,4 @@
-import { useLocation, useParams} from "react-router-dom";
+import { useLocation, useNavigate, useParams} from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { Patient, Service, Examination, Treatment, Receipt } from "@/entities";
 import ViewServices from "@/components/ViewServices";
@@ -22,6 +22,7 @@ function mixAndSortServices(treatments: Treatment[], examinations: Examination[]
 
 function ViewPatient() {
   useAuth()
+  const navigate = useNavigate()
   const [patient, setPatient] = useState<Patient|null>(null);
   const {patientId} = useParams();
   const location = useLocation();
@@ -45,7 +46,11 @@ function ViewPatient() {
     setLoading(true);
     const promise1 = (async () => {
       setError('');
-      const {url, options} = routes.getPatientById(parseInt(patientId));
+      const {url, options} = await routes.getPatientById(parseInt(patientId));
+      if (!options) {
+        navigate('/login');
+        return;
+      }
       const res = await fetch(url, options);
       if (res.ok) {
         const data = await res.json()
@@ -58,7 +63,11 @@ function ViewPatient() {
 
     const promise2 = (async () => {
       setError('');
-      const {url, options} = routes.getMedInfoById(parseInt(patientId));
+      const {url, options} = await routes.getMedInfoById(parseInt(patientId));
+      if (!options) {
+        navigate('/login');
+        return;
+      }
       const res = await fetch(url, options);
       if (res.ok) {
         const data = await res.json()
@@ -70,7 +79,11 @@ function ViewPatient() {
 
     const promise3 = (async () => {
       setError('');
-      const {url, options} = routes.getPatientTypes(parseInt(patientId));
+      const {url, options} = await routes.getPatientTypes(parseInt(patientId));
+      if (!options) {
+        navigate('/login');
+        return;
+      }
       const res = await fetch(url, options);
       if (res.ok) {
         const data = await res.json()

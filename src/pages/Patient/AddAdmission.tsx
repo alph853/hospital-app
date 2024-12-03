@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Select from "react-select";
@@ -10,6 +10,7 @@ import { Doctor } from "@/entities";
 
 function AddAdmission() {
     useAuth()
+    const navigate = useNavigate()
     const {patientId} = useParams();
     const [departments, setDepartments] = useState<string[]>([])
     const [doctors, setDoctors] = useState<{ecode: number, dtitle: string, name: string}[]>([])
@@ -26,7 +27,11 @@ function AddAdmission() {
     useEffect(() => {
         (async () => {
             setLoading(true)
-            const {url, options} = routes.getAllDepartments();
+            const {url, options} = await routes.getAllDepartments();
+            if (!options) {
+                navigate('/login');
+                return;
+              }
             const res = await fetch(url, options)
             if (res.ok) {
                 const data = await res.json()
@@ -38,7 +43,11 @@ function AddAdmission() {
     useEffect(() => {
         (async () => {
             setDoctorLoading(true)
-            const {url, options} = routes.getDoctorsByDepartment(formData.department);
+            const {url, options} = await routes.getDoctorsByDepartment(formData.department);
+            if (!options) {
+                navigate('/login');
+                return;
+              }
             const res = await fetch(url, options)
             if (res.ok) {
                 const data = await res.json()
@@ -55,8 +64,12 @@ function AddAdmission() {
             alert("Please fill all fields")
             return;
         }
-        const { url, options } = routes.AddAdmission(parseInt(patientId), parseInt(formData.doctor.ecode), 
+        const { url, options } = await routes.AddAdmission(parseInt(patientId), parseInt(formData.doctor.ecode), 
         parseInt(formData.fee.replace(/\D/g, '')), new Date(formData.start_date))
+        if (!options) {
+            navigate('/login');
+            return;
+          }
         const res = await fetch(url, options)
         if (res.ok) {
             setSuccess(true)

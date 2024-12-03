@@ -5,7 +5,9 @@ import doctorImage from '@/assets/doctor.png'
 import patientImage from '@/assets/patient.png'
 import medicalCheckupImage from '@/assets/medical-checkup.svg'
 import styles from '@/styles/Dashboard.module.scss'
+import { useNavigate } from "react-router-dom";
 function Dashboard() {
+    const navigate = useNavigate()
     const [numDoctors, setNumDoctors] = useState(0)
     const [numPatients, setNumPatients] = useState(0)
     const [loading, setLoading] = useState(false)
@@ -13,7 +15,11 @@ function Dashboard() {
     useEffect(() => {
         (async () => {
             setLoading(true)
-            const {url, options} = routes.countPatientandDoctors()
+            const {url, options} = await routes.countPatientandDoctors();
+            if (!options) {
+                navigate('/login');
+                return;
+            }
             const res = await fetch(url, options)
             if (res.ok) {
                 const data = await res.json()

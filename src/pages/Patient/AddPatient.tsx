@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FormEvent, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
@@ -8,6 +8,7 @@ import { routes } from "@/utils";
 import useAuth from "@/hooks/useAuth";
 function AddPatient() {
     useAuth()
+    const navigate = useNavigate()
     const [already, setAlready] = useState(false)
     const [patient, setPatient] = useState<Patient | undefined>(undefined)
     const [formData, setFormData] = useState({
@@ -38,7 +39,11 @@ function AddPatient() {
         }
         
         if (already) {
-            const { url, options } = routes.AddVisitedPatient(parseInt(formData.pid), formData.type, formData.address, formData.phone);
+            const { url, options } = await routes.AddVisitedPatient(parseInt(formData.pid), formData.type, formData.address, formData.phone);
+            if (!options) {
+                navigate('/login');
+                return;
+              }
             const res = await fetch(url, options);
             if (res.ok) {
                 const data = await res.json()
@@ -50,8 +55,12 @@ function AddPatient() {
             return;
         }
 
-        const { url, options } = routes.AddNewPatient(formData.fname, formData.lname, new Date(formData.dob), formData.type, 
+        const { url, options } = await routes.AddNewPatient(formData.fname, formData.lname, new Date(formData.dob), formData.type, 
                                                     formData.address, formData.phone, formData.gender);
+        if (!options) {
+            navigate('/login');
+            return;
+        }
         const res = await fetch(url, options);
         if (res.ok) {
             const data = await res.json()

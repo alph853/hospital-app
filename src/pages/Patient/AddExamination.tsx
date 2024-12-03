@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
@@ -17,6 +17,7 @@ function formatCurrency(value: string) {
 
 function AddExamination() {
     useAuth()
+    const navigate = useNavigate()
     const {patientId} = useParams();
     const [success, setSuccess] = useState(false)
     const [departments, setDepartments] = useState<string[]>([])
@@ -34,7 +35,11 @@ function AddExamination() {
     useEffect(() => {
         (async () => {
             setLoading(true)
-            const {url, options} = routes.getAllDepartments();
+            const {url, options} = await routes.getAllDepartments();
+            if (!options) {
+                navigate('/login');
+                return;
+              }
             const res = await fetch(url, options)
             if (res.ok) {
                 const data = await res.json()
@@ -52,8 +57,12 @@ function AddExamination() {
             return;
         }
         
-        const { url, options } = routes.addExamination(parseInt(patientId), parseInt(formData.doctor.ecode), 
+        const { url, options } = await routes.addExamination(parseInt(patientId), parseInt(formData.doctor.ecode), 
         parseInt(formData.fee.replace(/\D/g, '')), new Date(formData.e_date), formData.diagnosis, new Date(formData.next_exam_date))
+        if (!options) {
+            navigate('/login');
+            return;
+          }
         const res = await fetch(url, options)
         if (res.ok) {
             setSuccess(true)
@@ -65,7 +74,11 @@ function AddExamination() {
     useEffect(() => {
         (async () => {
             setDoctorLoading(true)
-            const {url, options} = routes.getDoctorsByDepartment(formData.department);
+            const {url, options} = await routes.getDoctorsByDepartment(formData.department);
+            if (!options) {
+                navigate('/login');
+                return;
+              }
             const res = await fetch(url, options)
             if (res.ok) {
                 const data = await res.json()
