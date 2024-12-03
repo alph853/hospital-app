@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Patient, Doctor } from '@/entities';
 import styles from '@/styles/InfoGrid.module.scss';
-import { DatetoString } from '@/utils';
+import { DatetoString, parseID } from '@/utils';
 
 function InfoGrid({ entities, rows }: { entities: Patient[] | Doctor[], rows: number }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -108,7 +108,7 @@ const renderPaginationButtons = () => {
         if (isPatient(entity)) {
             return (
                 <div key={entity.pid} className={styles.result}>
-                  <div>{entity.pid}</div>
+                  <div>{parseID(entity.pid)}</div>
                   <div>{entity.lname} {entity.fname}</div>
                   <div>{DatetoString(entity.dob)}</div>
                   <div>{entity.gender}</div>

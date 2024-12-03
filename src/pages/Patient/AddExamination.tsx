@@ -6,6 +6,7 @@ import Select from "react-select";
 import styles from '@/styles/AddPatient.module.scss'
 import { routes } from "@/utils";
 import useAuth from "@/hooks/useAuth";
+import { Doctor } from "@/entities";
 
 function formatCurrency(value: string) {
     let numericValue = value.replace(/\D/g, ''); 
@@ -68,7 +69,7 @@ function AddExamination() {
             const res = await fetch(url, options)
             if (res.ok) {
                 const data = await res.json()
-                setDoctors(data)
+                setDoctors(data.map((doctor: Doctor) => ({ecode: doctor.ecode, dtitle: doctor.dtitle, name: doctor.fname + ' ' + doctor.lname})))
             }
             setDoctorLoading(false)
         })()

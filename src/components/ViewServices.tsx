@@ -7,7 +7,7 @@ import styles from '@/styles/InfoGrid.module.scss';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 
-function ViewServices({ services, onClick, rows, selectedService }: { services: Service[], onClick: (service: Service) => void, rows: number, selectedService: number|null }) {
+function ViewServices({ services, onClick, rows, selectedService, type }: { services: Service[], onClick: (service: Service) => void, rows: number, selectedService: number|null, type: number|undefined }) {
   const { patientId } = useParams();
   const [displayedServices, setDisplayedServices] = useState<Service[]>(services);
   const [error, setError] = useState<string>('');
@@ -118,10 +118,10 @@ function ViewServices({ services, onClick, rows, selectedService }: { services: 
     <div className={styles.container}>
       <div className={styles.head}>
         <QuickFind onSubmit={searchService} placeholder={"Enter ID/Doctor name/Date"} />
-        <div className={styles.buttons}>
-          <Link to={`/patient/${patientId}/add/admission`}><FontAwesomeIcon icon={faPlusCircle}/>Add Admission</Link>
-          <Link to={`/patient/${patientId}/add/examination`}><FontAwesomeIcon icon={faPlusCircle}/> Add Examination</Link>
-        </div>
+        {type && <div className={styles.buttons}>
+          {(type === 1 || type ===2) &&<Link to={`/patient/${patientId}/add/admission`}><FontAwesomeIcon icon={faPlusCircle}/>Add Admission</Link>}
+          {(type === 0 || type ===2) &&<Link to={`/patient/${patientId}/add/examination`}><FontAwesomeIcon icon={faPlusCircle}/> Add Examination</Link>}
+        </div>}
       </div>
       {error ? <div>{error}</div> : <div className={styles.search}>
         <div className={styles.header}>

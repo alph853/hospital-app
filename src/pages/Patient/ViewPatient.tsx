@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { Patient, Service, Examination, Treatment, Receipt } from "@/entities";
 import ViewServices from "@/components/ViewServices";
 import ViewReceipt from "@/components/ViewReceipt";
-import { DatetoString, routes } from "@/utils";
+import { DatetoString, parseID, routes } from "@/utils";
 import styles from '@/styles/ViewDoctor.module.scss';
 import useAuth from "@/hooks/useAuth";
 
@@ -29,6 +29,7 @@ function ViewPatient() {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt|undefined>(undefined)
   const [selectedService, setSelectedService] = useState<number|null>(null)
+  const [type, setType] = useState<number|undefined>(undefined);
   const receipts = useRef<Receipt[]>([]);
   const containerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -52,7 +53,7 @@ function ViewPatient() {
         return;
       }
       setLoading(false);
-      setError('Getting patient went wrong')
+      setError(prev => prev === "" ? 'Getting patient went wrong': prev + '. Getting patient went wrong')
     })();
 
     const promise2 = (async () => {
@@ -64,12 +65,26 @@ function ViewPatient() {
         receipts.current = data
         return;
       }
-      setError('Getting med info went wrong')
+      setError(prev => prev === "" ? 'Getting med info went wrong': prev + '. Getting med info went wrong')
     })();
 
-    Promise.all([promise1, promise2]).then(() => {
+    const promise3 = (async () => {
+      setError('');
+      const {url, options} = routes.getPatientTypes(parseInt(patientId));
+      const res = await fetch(url, options);
+      if (res.ok) {
+        const data = await res.json()
+        setType(data.type)
+        return;
+      }
+      setError(prev => prev === "" ? 'Getting patient types went wrong': prev + '. Getting patient types went wrong')
+    })();
+
+
+    Promise.all([promise1, promise2,promise3]).then(() => {
       setLoading(false);
     })
+
 
   },[patientId])
 
@@ -107,7 +122,7 @@ function ViewPatient() {
             <h1>{patient.fname} {patient.lname}</h1>
             <div>
             <h2>Code:</h2>
-            <p>{patient.pid}</p>
+            <p>{parseID(patient.pid)}</p>
           </div>
           <div>
             <h2>Date of Birth:</h2>
@@ -132,7 +147,7 @@ function ViewPatient() {
           </div>
           {selectedReceipt && <ViewReceipt receipt={selectedReceipt}/>}
           </div>
-            <ViewServices selectedService={selectedService} services={mixAndSortServices(patient.treatments, patient.examinations)} onClick={handleClick} rows={5}/>
+            <ViewServices type={type} selectedService={selectedService} services={mixAndSortServices(patient.treatments, patient.examinations)} onClick={handleClick} rows={5}/>
           </>
         )}
       </div>

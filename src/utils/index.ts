@@ -72,6 +72,10 @@ export const routes = {
         url: baseUrl+'/api/v1/treatment',
         options: {method: 'POST', body: JSON.stringify({pid, ecode, fee, start_date}), headers: {'Content-Type': 'application/json'}, credentials: 'include' as RequestCredentials}
     }),
+    getPatientTypes: (pid: number) => ({
+        url: baseUrl+`/api/v1/patient/type/${pid}`,
+        options: {method: 'GET', headers: {'Content-Type': 'application/json'}, credentials: 'include' as RequestCredentials}
+    })
 }
 
 
@@ -97,4 +101,8 @@ export function parseSearch(search: string): ({id: number, fname: string, lname:
         }
     }
     return null;
+}
+
+export function parseID(pid: number) {
+    return pid.toString().padStart(9, '0');
 }
