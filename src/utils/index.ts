@@ -14,6 +14,11 @@ export const routes = {
         url: baseUrl+'/api/v1/login',
         options: {method: 'GET', headers: {'Content-Type': 'application/json'}, credentials: "include" as RequestCredentials}
     }),
+    // log out
+    logout: () => ({
+        url: baseUrl+'/api/v1/logout',
+        options: {method: 'GET', headers: {'Content-Type': 'application/json'}, credentials: "include" as RequestCredentials}
+    }),
     // search doctor
     doctorSearch:  (ecode: number, fname: string, lname: string) =>
         ({url: baseUrl+'/api/v1/search',
