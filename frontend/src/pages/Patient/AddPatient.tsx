@@ -6,6 +6,15 @@ import styles from "@/styles/AddPatient.module.scss"
 import { Patient } from "@/entities"
 import { routes } from "@/utils"
 import useAuth from "@/hooks/useAuth"
+
+const formatPhone = (phone: string) => {
+  phone = phone.replace(/\D/g, "");
+  if (phone.length > 10) {
+    phone = phone.slice(0, 10);
+  }
+  return phone;
+}
+
 function AddPatient() {
   useAuth()
   const navigate = useNavigate()
@@ -218,7 +227,7 @@ function AddPatient() {
             value={formData.phone}
             placeholder="Enter phone"
             onChange={(e) => {
-              setFormData((prev) => ({ ...prev, phone: e.target.value }))
+              setFormData((prev) => ({ ...prev, phone: formatPhone(e.target.value) }))
             }}
           />
         </div>
