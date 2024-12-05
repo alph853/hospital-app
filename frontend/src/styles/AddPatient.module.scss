@@ -1,0 +1,82 @@
+.container {
+  height: 100vh;
+  padding: 40px 60px;
+  overflow: hidden;
+  .already {
+    margin-bottom: 30px;
+    transform: scale(1.5);
+    transform-origin: left top;
+    label {
+      font-size: 1.5em;
+      margin-right: 10px;
+    }
+  }
+  .buttons {
+    margin-bottom: 5%;
+    display: flex;
+    width: 40%;
+    a {
+      padding: 20px 40px;
+      color: #00acb0;
+      text-decoration: none;
+      border: 1px solid #00acb0;
+      border-radius: 5px;
+      margin-right: 40px;
+      &:hover {
+        background-color: rgba(128, 128, 128, 0.147);
+      }
+    }
+    button {
+      background-color: #00acb0;
+      color: white;
+      border-radius: 5px;
+      padding: 20px 20px;
+      border: none;
+      font-size: 1em;
+      font-weight: bold;
+      svg {
+        margin-right: 10px;
+      }
+      &:hover {
+        background-color: #47878e;
+      }
+    }
+  }
+  form {
+    transform: scale(1.2);
+    transform-origin: top left;
+    width: 60vw;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    > div {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      width: 50%;
+      margin-bottom: 10px;
+    }
+    input {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid black;
+    }
+    span {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    a {
+      color: white;
+      text-decoration: none;
+      background-color: #00acb0;
+      padding: 10px;
+      border-radius: 5px;
+      &:hover {
+        background-color: #47878e;
+      }
+    }
+  }
+  .select {
+    width: 50%;
+  }
+}

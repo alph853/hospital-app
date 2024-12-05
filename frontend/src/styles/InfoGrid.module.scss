@@ -1,0 +1,125 @@
+.search {
+    .header, .result {
+        display: grid;
+        grid-template-columns: 1fr 2fr 2fr 1fr 1fr;
+        margin-bottom: 20px;
+        padding: 0 0 0 10px;
+    }
+    .header {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #015D67;
+    }
+    .result {
+        color:#015D67;
+        font-size: 1.2em;
+        border-radius: 10px;
+        div {
+            display: flex;
+            align-items: center;
+        }
+        a {
+            text-decoration: none;
+            background-color: #00ACB1;
+            color: white;
+            font-weight: bold;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            cursor: pointer;
+            &:hover {
+                background-color: #47878E;
+            }
+        }
+        .doctors {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); /* Adjust the minmax value as needed */
+            grid-auto-flow: row;
+            gap: 5px;
+            a {
+                background: none;
+                font-size: 90%;
+                color: #015D67;
+                justify-content: flex-start;
+                font-weight: normal;
+                &:hover {
+                    text-decoration: underline;
+                    color: blue;
+                }
+            }
+
+        }
+    }
+    .hover {
+        cursor: pointer;
+        &:hover {
+            background-color: rgba(128, 128, 128, 0.298);
+        }
+    }
+    .selected {
+        background-color: #00abb18f;
+        color: white;
+        font-weight: bold;
+        a {
+            color: white !important;
+            &:hover {
+                color: blue !important;
+            }
+        }
+        &:hover {
+            background-color: #47878E;
+        }
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 20px;
+        button {
+            background-color: white;
+            color: #00ACB1;
+            font-weight: bold;
+            border: 1px solid #00ACB1;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            &:hover {
+                background-color: #47878E;
+            }
+        }
+        .active {
+            background-color: #00ACB1;
+            color: white;
+        }   
+    }
+}
+
+.container {
+    .head {
+        display: flex;
+        justify-content: space-between;
+        .buttons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            a {
+                background-color: #00ACB1;
+                color: white;
+                font-weight: bold;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+                cursor: pointer;
+                text-decoration: none;
+                &:hover {
+                    background-color: #47878E;
+                }
+                svg {
+                    margin-right: 10px;
+                }
+            }
+        }
+    }
+}
