@@ -97,6 +97,12 @@ class PatientService:
             WHERE LOWER(LNAME) = :fname or LOWER(FNAME) = :fname)''')
             results = await session.execute(query,{'fname': search_data.fname.lower()})
             rows = results.fetchall()
+        elif not search_data.pid and not search_data.fname and not search_data.lname: 
+            inpatient_query = select(Inpatient.pid,Inpatient.lname,Inpatient.fname,Inpatient.dob,Inpatient.address, Inpatient.phone,Inpatient.gender).where(Inpatient.phone == search_data.phone)
+            outpatient_query = select(Outpatient.pid,Outpatient.lname,Outpatient.fname,Outpatient.dob,Outpatient.address, Outpatient.phone,Outpatient.gender).where(Outpatient.phone == search_data.phone)
+            query = inpatient_query.union(outpatient_query)
+            res = await session.exec(query)
+            rows = res.all()
         if rows: 
             return [
                 PatientModel(

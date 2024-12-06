@@ -144,3 +144,4 @@ user_details=Depends(access_token_bearer)
         return type
     return {"error": "No patient found"}
 
+
