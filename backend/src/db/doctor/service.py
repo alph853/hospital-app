@@ -1,6 +1,6 @@
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .schemas import DoctorResponseModel, PatientTreatmentResponse, TreatmentItem, DoctorSearchModel
-from ..models import Doctor, Department, Treat, Inpatient, Admission, Treatment, Nurse
+from ..models import Doctor, Department, Treat, Inpatient, Admission, Treatment, Nurse, Doctor_Phone
 from sqlmodel import select
 from sqlalchemy.sql import func
 from sqlalchemy import and_, distinct, text
@@ -180,7 +180,7 @@ class DoctorService:
 
     async def doctor_search_name_code(self,search_data:DoctorSearchModel,session:AsyncSession):
         rows = None
-        if search_data.ecode: 
+        if search_data.ecode or search_data.ecode != 0: 
             query = select(Doctor.ecode,Doctor.lname, Doctor.fname, Doctor.dob,Doctor.address,Doctor.gender,Doctor.start_date,Doctor.degree_name,Doctor.degree_year, Doctor.dcode,Department.dtitle).join(Department, Department.dcode == Doctor.dcode).where(Doctor.ecode == search_data.ecode)
             res = await session.exec(query)
             rows = res.all()
@@ -200,6 +200,10 @@ class DoctorService:
                 ''')
             results = await session.execute(query,{'fname': search_data.fname.lower()})
             rows = results.fetchall()
+        elif not search_data.ecode and not search_data.fname and not search_data.lname and search_data.phone: 
+            query = select(Doctor.ecode,Doctor.lname,Doctor.fname,Doctor.dob,Doctor.address,Doctor.gender ,Doctor.start_date,Doctor.degree_name,Doctor.degree_year,Doctor.dcode,Department.dtitle).join(Department, Department.dcode == Doctor.dcode).join(Doctor_Phone, Doctor_Phone.ecode == Doctor.ecode).where(Doctor_Phone.phone_num == search_data.phone)
+            res = await session.exec(query)
+            rows = res.all()
         if rows: 
             return [
                 DoctorResponseModel(

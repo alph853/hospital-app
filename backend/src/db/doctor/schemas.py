@@ -39,3 +39,4 @@ class DoctorSearchModel(BaseModel):
     ecode: Optional[int] = None
     fname: Optional[str] = None  # Allow None
     lname: Optional[str] = None
+    phone: Optional[str] = None

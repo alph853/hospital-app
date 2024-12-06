@@ -59,7 +59,7 @@ async def doctor_search(
     if doctors: 
         return {'doctors':doctors}
     
-    return {'error': 'No doctor found'}
+    return {'doctors':[]}
 
 @doctor_router.get('/get_doctor_department/{dtitle}')
 async def doctor_search_department(
@@ -70,7 +70,7 @@ async def doctor_search_department(
     res = await doctor_service.search_doctors_by_department(dtitle,session)
     if res: 
         return res
-    return {'error':'No doctor found'}
+    return {'doctors':[]}
 
 @doctor_router.get('/get_nurse_department/{dtitle}')
 async def doctor_search_department(

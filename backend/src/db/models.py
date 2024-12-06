@@ -35,9 +35,9 @@ class Department(SQLModel, table=True):
     dtitle: str = Field(sa_column=Column(String(100), nullable=False))
     mgr_code: Optional[int] = Field(sa_column=Column(Integer, ForeignKey("doctor.ecode", name="fk_mgr_code"), nullable=True))
 
-class Phone(SQLModel, table=True):
+class Doctor_Phone(SQLModel, table=True):
     ecode: int = Field(sa_column=Column(Integer,ForeignKey("doctor.ecode") ,nullable=False,primary_key=True))
-    phone_num: str = Field(sa_column=Column(String(12), primary_key=True))
+    phone_num: str = Field(sa_column=Column(String(10), primary_key=True))
 
 class Examination(SQLModel, table=True):
     sid: Optional[int] = Field(default=None, sa_column=Column(Integer, autoincrement=True, primary_key=True))

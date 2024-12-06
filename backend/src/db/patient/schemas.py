@@ -6,6 +6,7 @@ class PatientSearchModel(BaseModel):
     pid: Optional[int] = None
     lname: Optional[str] = None 
     fname: Optional[str] = None
+    phone: Optional[str] = None
 class AdmissionModel(BaseModel):
     pid: Optional[int] = None
     date_of_adm: date 
