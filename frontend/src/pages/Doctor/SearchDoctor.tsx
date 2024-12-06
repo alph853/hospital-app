@@ -18,14 +18,14 @@ function SearchDoctor() {
       return
     }
     setError("")
-    setLoading(true)
     const searchResult = parseSearch(search)
     if (!searchResult) {
       setError("Invalid search term")
       return
     }
-    const { id, fname, lname } = searchResult
-    const { url, options } = await routes.doctorSearch(id, fname, lname)
+    setLoading(true)
+    const { id, fname, lname, phone } = searchResult
+    const { url, options } = await routes.doctorSearch(id, fname, lname, phone)
     if (!options) {
       navigate("/login")
       return

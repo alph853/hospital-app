@@ -71,9 +71,9 @@ export const routes = {
     options: await makeOptions("GET", null, true),
   }),
   // search doctor
-  doctorSearch: async (ecode: number, fname: string, lname: string) => ({
+  doctorSearch: async (ecode: number, fname: string, lname: string, phone: string) => ({
     url: `${baseUrl}/api/v1/doctor/search`,
-    options: await makeOptions("POST", { ecode, fname, lname }, true),
+    options: await makeOptions("POST", { ecode, fname, lname, phone }, true),
   }),
 
   // get doctor by id
@@ -87,9 +87,9 @@ export const routes = {
     options: await makeOptions("GET", null, true),
   }),
   // return array of patients with treatments and examinations
-  patientSearch: async (pid: number, fname: string, lname: string) => ({
+  patientSearch: async (pid: number, fname: string, lname: string, phone: string) => ({
     url: `${baseUrl}/api/v1/patient/search`,
-    options: await makeOptions("POST", { pid, fname, lname }, true),
+    options: await makeOptions("POST", { pid, fname, lname, phone }, true),
   }),
 
   AddNewPatient: async (
@@ -216,19 +216,26 @@ function isAlphabetic(value: string): boolean {
 }
 export function parseSearch(
   search: string
-): { id: number; fname: string; lname: string } | null {
+): { id: number; fname: string; lname: string, phone: string } | null {
+  if (search.includes("p:")) {
+    const match = search.match(/p:(\d{1,10})/);
+    if (match) {
+      return { id: 0, fname: "", lname: "", phone: match[1] };
+    }
+    return null;
+  }
   if (search.startsWith("OP") || search.startsWith("IP")) {
     search = search.slice(2)
   }
   if (isNumeric(search)) {
-    return { id: parseInt(search), fname: "", lname: "" }
+    return { id: parseInt(search), fname: "", lname: "", phone: "" }
   }
   if (isAlphabetic(search)) {
     if (search.includes(" ")) {
       const [fname, lname] = search.split(" ")
-      return { id: 0, fname, lname }
+      return { id: 0, fname, lname, phone: "" }
     } else {
-      return { id: 0, fname: search, lname: "" }
+      return { id: 0, fname: search, lname: "", phone: "" }
     }
   }
   return null
